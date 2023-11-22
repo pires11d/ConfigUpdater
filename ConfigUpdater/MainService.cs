@@ -15,16 +15,29 @@ namespace ConfigUpdater
             }
             else
             {
-                if (args.Length > 2 && args[0].Contains("ConfigUpdater.exe"))
+                if (args[0].Contains("ConfigUpdater.exe"))
                 {
-                    args[0] = args[1];
-                    args[1] = args[2];
+                    for (int i = 0; i < args.Length - 1; i++)
+                    {
+                        args[i] = args[i + 1];
+                    }
                 }
 
                 try
                 {
-                    UpdateConfigFile(args[0], args[1]);
-                    return;
+                    switch (args.Length)
+                    {
+                        case 2:
+                        {
+                            UpdateConfigFile(args[0], args[1]);
+                            return;
+                        }
+                        case 3:
+                        {
+                            EditConfigFile(args[0], args[1], args[2]);
+                            return;
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -47,42 +60,67 @@ namespace ConfigUpdater
             if (_hide) return;
 
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("-----------------------------------------");
-            Console.WriteLine("------------- ConfigUpdater -------------");
-            Console.WriteLine("-----------------------------------------");
+            Console.WriteLine("-----------------------------------------------");
+            Console.WriteLine("---------------- ConfigUpdater ----------------");
+            Console.WriteLine("-----------------------------------------------");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write($"Uso: ConfigUpdater.exe [options]");
+
+            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine("-----------------------------------------------");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write($"ConfigUpdater.exe ");
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write($"<path1> ");
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write($"<path2>");
-            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine($"<path1> <path2>");
+            Console.Write(Environment.NewLine);
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write($"<path1> = ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write($"diretório ou arquivo de origem");
             Console.Write(Environment.NewLine);
-            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write($"<path2> = ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write($"diretório ou arquivo de destino");
+
+            Console.WriteLine(Environment.NewLine);
+            Console.WriteLine("-----------------------------------------------");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write($"ConfigUpdater.exe ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"<path> <oldValue> <newValue>");
+            Console.Write(Environment.NewLine);
+            Console.Write($"<path> = ");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write($"caminho do arquivo a ser modificado");
+            Console.Write(Environment.NewLine);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write($"<oldValue> = ");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write($"valor antigo (procurado)");
+            Console.Write(Environment.NewLine);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write($"<newValue> = ");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write($"valor novo (substituto)");
+
             Console.ForegroundColor = ConsoleColor.White;
             Console.WriteLine(Environment.NewLine);
         }
 
-        public static void UpdateConfigFile(string sourceFolderPath, string destinationFolderPath)
+        private static void UpdateConfigFile(string sourceFolderPath, string targetFolderPath)
         {
             Console.ForegroundColor = ConsoleColor.DarkGray;
             sourceFolderPath = sourceFolderPath.Fix();
-            destinationFolderPath = destinationFolderPath.Fix();
+            targetFolderPath = targetFolderPath.Fix();
 
             Console.WriteLine($"\nBuscando arquivo de origem no diretório: {sourceFolderPath}");
             var sourceFilePath = GetConfigFilePath(sourceFolderPath);
             Console.WriteLine($"\nArquivo de origem: {sourceFilePath}");
 
-            Console.WriteLine($"\nBuscando arquivo de destino no diretório: {destinationFolderPath}");
-            var destinationFilePath = GetConfigFilePath(destinationFolderPath);
-            Console.WriteLine($"\nArquivo de destino: {destinationFilePath}");
+            Console.WriteLine($"\nBuscando arquivo de destino no diretório: {targetFolderPath}");
+            var targetFilePath = GetConfigFilePath(targetFolderPath);
+            Console.WriteLine($"\nArquivo de destino: {targetFilePath}");
 
             if (sourceFilePath is null)
             {
@@ -91,44 +129,44 @@ namespace ConfigUpdater
 
             var file = File.ReadAllText(sourceFilePath);
 
-            if (destinationFilePath is null)
+            if (targetFilePath is null)
             {
-                if (Directory.Exists(destinationFolderPath))
+                if (Directory.Exists(targetFolderPath))
                 {
-                    destinationFilePath = Path.Combine(destinationFolderPath, Path.GetFileName(sourceFilePath));
+                    targetFilePath = Path.Combine(targetFolderPath, Path.GetFileName(sourceFilePath));
                 }
-                else if (destinationFolderPath.EndsWith(Path.GetFileName(sourceFilePath)))
+                else if (targetFolderPath.EndsWith(Path.GetFileName(sourceFilePath)))
                 {
-                    destinationFilePath = destinationFolderPath;
+                    targetFilePath = targetFolderPath;
                 }
                 else
                 {
                     throw new ApplicationException("Erro: Diretório de destino inválido!");
                 }
 
-                Console.WriteLine($"\nArquivo de destino não encontrado, portanto será criado em: {destinationFilePath}");
-                File.WriteAllText(destinationFilePath, file);
+                Console.WriteLine($"\nArquivo de destino não encontrado, portanto será criado em: {targetFilePath}");
+                File.WriteAllText(targetFilePath, file);
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("\nArquivo criado com sucesso!");
                 return;
             }
 
-            if (Path.GetFileName(sourceFilePath) != Path.GetFileName(destinationFilePath))
+            if (Path.GetFileName(sourceFilePath) != Path.GetFileName(targetFilePath))
             {
                 throw new ApplicationException("Erro: Os nomes dos arquivos de origem e destino não são iguais!");
             }
 
-            if (file.StartsWith("<"))
+            if (sourceFilePath.EndsWith("config"))
             {
                 Console.WriteLine("\nAtualizando arquivo do tipo XML...");
-                UpdateXmlFile(sourceFilePath, destinationFilePath);
+                UpdateXmlFile(sourceFilePath, targetFilePath);
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("\nArquivo XML atualizado com sucesso!");
             }
-            else if (file.StartsWith("{"))
+            else if (sourceFilePath.EndsWith("json"))
             {
                 Console.WriteLine("\nAtualizando arquivo do tipo JSON...");
-                UpdateJsonFile(sourceFilePath, destinationFilePath);
+                UpdateJsonFile(sourceFilePath, targetFilePath);
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("\nArquivo JSON atualizado com sucesso!");
             }
@@ -136,6 +174,31 @@ namespace ConfigUpdater
             {
                 throw new ApplicationException("Erro: Arquivo com formato desconhecido!");
             }
+        }
+
+        private static void EditConfigFile(string filePath, string oldValue, string newValue)
+        {
+            filePath = filePath.Fix();
+            oldValue = oldValue.Fix();
+            newValue = newValue.Fix();
+
+            if (!File.Exists(filePath))
+            {
+                throw new ApplicationException($"Erro: Arquivo não encontrado! Caminho: {filePath}");
+            }
+
+            if (oldValue is null || newValue is null)
+            {
+                throw new ApplicationException("Erro: Para editar arquivos, informe 3 parâmetros!" +
+                    "\n- Caminho do arquivo" +
+                    "\n- Valor antigo" +
+                    "\n- Valor novo");
+            }
+
+            Console.WriteLine($"\nEditando arquivo: substituindo o valor '{oldValue}' por '{newValue}'...");
+            EditFile(filePath, oldValue, newValue);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\nEdição finalizada com sucesso!");
         }
 
         private static string? GetConfigFilePath(string folderPath, SearchOption option = SearchOption.TopDirectoryOnly)
@@ -182,10 +245,10 @@ namespace ConfigUpdater
             return files.FirstOrDefault();
         }
 
-        private static void UpdateXmlFile(string sourceFilePath, string destinationFilePath)
+        private static void UpdateXmlFile(string sourceFilePath, string targetFilePath)
         {
             var oldXml = new XmlDocument();
-            oldXml.Load(destinationFilePath);
+            oldXml.Load(targetFilePath);
 
             var oldConfigurationNode = oldXml.DocumentElement.SelectSingleNode($"/configuration");
             var oldSettingsNodes = oldConfigurationNode.ChildNodes.ToList().Where(x => x.Name.ToLower().Contains("settings")).ToList();
@@ -221,12 +284,12 @@ namespace ConfigUpdater
                 newContent = newContent.Replace(newSettings, oldSettings);
             }
 
-            File.WriteAllText(destinationFilePath, newContent.PrettifyXml());
+            File.WriteAllText(targetFilePath, newContent.PrettifyXml());
         }
 
-        private static void UpdateJsonFile(string sourceFilePath, string destinationFilePath)
+        private static void UpdateJsonFile(string sourceFilePath, string targetFilePath)
         {
-            var oldFile = File.ReadAllText(destinationFilePath);
+            var oldFile = File.ReadAllText(targetFilePath);
             var oldJson = JObject.Parse(oldFile);
 
             var newFile = File.ReadAllText(sourceFilePath);
@@ -237,7 +300,7 @@ namespace ConfigUpdater
                 MergeNodes(node, oldJson);
             }
 
-            File.WriteAllText(destinationFilePath, oldJson.ToString());
+            File.WriteAllText(targetFilePath, oldJson.ToString());
         }
 
         private static void MergeNodes(JToken node, JObject oldJson)
@@ -261,6 +324,15 @@ namespace ConfigUpdater
                     }
                 }
             }
+        }
+
+        private static void EditFile(string filePath, string oldValue, string newValue)
+        {
+            var file = File.ReadAllText(filePath);
+
+            file = file.Replace(oldValue, newValue);
+
+            File.WriteAllText(filePath, file);
         }
     }
 }
