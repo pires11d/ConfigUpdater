@@ -9,14 +9,14 @@ A tool that updates the configuration files in published applications, without o
 
 ### Usage:
 
-~~~
-ConfigUpdater.exe <path1> <path2>
+~~~ps1
+ConfigUpdater.exe "path1" "path2"
 ~~~
 
-`<path1>` = Source folder or file path
+`"path1"` = Source folder or file path
 
 > Example: `"C:\Path\To\SourceFolder\appsettings.json"`)
 
-`<path2>` = Target folder or file path 
+`"path2"` = Target folder or file path 
 
 > Example: `"C:\Path\To\TargetFolder\appsettings.json"`)
