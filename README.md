@@ -6,3 +6,13 @@ A tool that updates the configuration files in published applications, without o
 - *.exe.config
 - appsettings.json
 - web.config
+
+### Usage:
+
+~~~
+ConfigUpdater.exe <path1> <path2>
+~~~
+
+`<path1>` = Source folder or file path
+
+`<path2>` = Target folder or file path
