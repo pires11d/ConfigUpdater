@@ -15,4 +15,8 @@ ConfigUpdater.exe <path1> <path2>
 
 `<path1>` = Source folder or file path
 
-`<path2>` = Target folder or file path
+> Example: `"C:\Path\To\SourceFolder\appsettings.json"`)
+
+`<path2>` = Target folder or file path 
+
+> Example: `"C:\Path\To\TargetFolder\appsettings.json"`)
