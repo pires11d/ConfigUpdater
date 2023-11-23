@@ -5,13 +5,13 @@ namespace ConfigUpdater
 {
     public static class MainService
     {
-        private static bool _hide;
+        private static bool _interactiveMode;
         public static void Process(string[] args)
         {
             if (args == null || args.Length < 2)
             {
                 ShowHelp();
-                _hide = true;
+                _interactiveMode = true;
             }
             else
             {
@@ -28,19 +28,27 @@ namespace ConfigUpdater
                     switch (args.Length)
                     {
                         case 2:
-                        {
-                            UpdateConfigFile(args[0], args[1]);
-                            return;
-                        }
+                            {
+                                UpdateConfigFile(args[0], args[1]);
+                                break;
+                            }
                         case 3:
-                        {
-                            EditConfigFile(args[0], args[1], args[2]);
-                            return;
-                        }
+                            {
+                                EditConfigFile(args[0], args[1], args[2]);
+                                break;
+                            }
+                    }
+                    if (!_interactiveMode)
+                    {
+                        return;
                     }
                 }
                 catch (Exception ex)
                 {
+                    if (!_interactiveMode)
+                    {
+                        throw;
+                    }
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(Environment.NewLine + ex.Message);
                 }
@@ -57,7 +65,7 @@ namespace ConfigUpdater
 
         private static void ShowHelp()
         {
-            if (_hide) return;
+            if (_interactiveMode) return;
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("-----------------------------------------------");
@@ -127,10 +135,10 @@ namespace ConfigUpdater
                 throw new ApplicationException("Erro: Arquivo de origem não encontrado!");
             }
 
-            var file = File.ReadAllText(sourceFilePath);
-
             if (targetFilePath is null)
             {
+                var file = File.ReadAllText(sourceFilePath);
+
                 if (Directory.Exists(targetFolderPath))
                 {
                     targetFilePath = Path.Combine(targetFolderPath, Path.GetFileName(sourceFilePath));
@@ -149,11 +157,6 @@ namespace ConfigUpdater
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("\nArquivo criado com sucesso!");
                 return;
-            }
-
-            if (Path.GetFileName(sourceFilePath) != Path.GetFileName(targetFilePath))
-            {
-                throw new ApplicationException("Erro: Os nomes dos arquivos de origem e destino não são iguais!");
             }
 
             if (sourceFilePath.EndsWith("config"))
