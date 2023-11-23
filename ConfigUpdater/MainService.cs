@@ -143,7 +143,7 @@ namespace ConfigUpdater
                 {
                     targetFilePath = Path.Combine(targetFolderPath, Path.GetFileName(sourceFilePath));
                 }
-                else if (targetFolderPath.EndsWith(Path.GetFileName(sourceFilePath)))
+                else if (Directory.Exists(Path.GetDirectoryName(targetFolderPath)))
                 {
                     targetFilePath = targetFolderPath;
                 }
