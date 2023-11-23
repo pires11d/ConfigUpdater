@@ -198,7 +198,8 @@ namespace ConfigUpdater
                     "\n- Valor novo");
             }
 
-            Console.WriteLine($"\nEditando arquivo: substituindo o valor '{oldValue}' por '{newValue}'...");
+            Console.WriteLine($"\nEditando arquivo: {filePath}");
+            Console.WriteLine($"\nSubstituindo o valor '{oldValue}' por '{newValue}'...");
             EditFile(filePath, oldValue, newValue);
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\nEdição finalizada com sucesso!");
