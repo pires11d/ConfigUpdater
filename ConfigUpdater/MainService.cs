@@ -309,22 +309,34 @@ namespace ConfigUpdater
 
         private static void MergeNodes(JToken node, JObject oldJson)
         {
-            var path = node.Path;
-            var name = path.Split('.').LastOrDefault();
-            var oldChildren = oldJson.SelectTokens(node.Path).ToList();
-            if (!oldChildren.Any())
+            if (node.Parent.Type == JTokenType.Property)
             {
-                var parentObject = oldJson.SelectToken(node.Parent.Parent.Path).ToObject<JObject>();
-                parentObject.Add(new JProperty(name, node));
-                oldJson[node.Parent.Parent.Path] = parentObject;
-            }
-            else
-            {
-                if (node.HasValues)
+                var path = node.Path;
+                var property = (JProperty)node.Parent;
+                var name = property.Name;
+                var oldChildren = oldJson.SelectTokens(node.Path).ToList();
+                if (!oldChildren.Any())
                 {
-                    foreach (var subNode in node.Values())
+                    var parentPath = node.Parent.Parent.Path;
+                    var parentObject = oldJson.SelectToken(parentPath).ToObject<JObject>();
+                    parentObject.Add(new JProperty(name, node));
+                    if (!parentPath.HasValue())
                     {
-                        MergeNodes(subNode, oldJson);
+                        oldJson.Root[path] = node;
+                    }
+                    else
+                    {
+                        oldJson[parentPath] = parentObject;
+                    }
+                }
+                else
+                {
+                    if (node.HasValues)
+                    {
+                        foreach (var subNode in node.Values())
+                        {
+                            MergeNodes(subNode, oldJson);
+                        }
                     }
                 }
             }
