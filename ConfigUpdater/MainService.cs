@@ -326,7 +326,7 @@ namespace ConfigUpdater
                     }
                     else
                     {
-                        oldJson[parentPath] = parentObject;
+                        oldJson.ReplaceByPath(parentPath, parentObject);
                     }
                 }
                 else

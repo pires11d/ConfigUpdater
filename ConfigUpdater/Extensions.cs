@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Newtonsoft.Json.Linq;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -20,8 +21,8 @@ namespace System
                 value = value.Substring(1);
             }
 
-            if (value.EndsWith("\"")) 
-            { 
+            if (value.EndsWith("\""))
+            {
                 value = value.Remove(value.Length - 1, 1);
             }
 
@@ -108,6 +109,28 @@ namespace System
                 }
             }
             return nodeList;
+        }
+
+        public static JObject ReplaceByPath<T>(this JToken root, string path, T newValue)
+        {
+            if (root == null || path == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            foreach (var value in root.SelectTokens(path).ToList())
+            {
+                if (value == root)
+                {
+                    root = JToken.FromObject(newValue);
+                }
+                else
+                {
+                    value.Replace(JToken.FromObject(newValue));
+                }
+            }
+
+            return (JObject)root;
         }
     }
 }
