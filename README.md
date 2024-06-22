@@ -1,4 +1,4 @@
-# ConfigUpdater
+# ConfigUpdater (Continuous Deployment Tool)
 
 A tool that updates the configuration files in published applications, without overwriting existing settings.
 
